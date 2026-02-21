@@ -8,7 +8,6 @@ const {
 const express = require("express");
 const app = express();
 
-// 🌐 Mini servidor para Render (evita que se reinicie)
 app.get("/", (req, res) => {
     res.send("Bot is running");
 });
@@ -17,7 +16,6 @@ app.listen(process.env.PORT || 3000, () => {
     console.log("Web server started");
 });
 
-// 🤖 Crear cliente Discord
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -25,11 +23,10 @@ const client = new Client({
     ]
 });
 
-// ✅ Evento listo
+const STAFF_ROLE_ID = "1473013475650568294";
+
 client.once('clientReady', async () => {
     console.log(`Bot ready as ${client.user.tag}`);
-
-    const STAFF_ROLE_ID = "1473013475650568294";
 
     const guild = client.guilds.cache.first();
     if (!guild) return;
@@ -50,9 +47,6 @@ client.once('clientReady', async () => {
 
         if (!existingChannel) {
 
-            console.log(`Creating missing channel for ${member.user.tag}`);
-
-            // 🔎 Buscar categorías
             let categories = guild.channels.cache.filter(
                 c => c.type === ChannelType.GuildCategory &&
                      c.name.startsWith("Private Channels")
@@ -104,14 +98,25 @@ client.once('clientReady', async () => {
                     }
                 ]
             });
+
+            console.log(`Created missing channel for ${member.user.tag}`);
         }
     }
 });
-// 👥 Cuando entra un miembro
+
 client.on('guildMemberAdd', async (member) => {
     try {
 
-        // 🔎 Buscar categorías que empiecen con "Private Channels"
+        const channelName = member.displayName
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, "-");
+
+        const existingChannel = member.guild.channels.cache.find(
+            ch => ch.name === channelName
+        );
+
+        if (existingChannel) return;
+
         let categories = member.guild.channels.cache.filter(
             c => c.type === ChannelType.GuildCategory &&
                  c.name.startsWith("Private Channels")
@@ -119,7 +124,6 @@ client.on('guildMemberAdd', async (member) => {
 
         let targetCategory = null;
 
-        // Buscar una categoría con menos de 50 canales
         for (const category of categories.values()) {
             const children = member.guild.channels.cache.filter(
                 ch => ch.parentId === category.id
@@ -131,7 +135,6 @@ client.on('guildMemberAdd', async (member) => {
             }
         }
 
-        // Si todas están llenas o no existe ninguna, crear nueva
         if (!targetCategory) {
             const number = categories.size + 1;
             targetCategory = await member.guild.channels.create({
@@ -140,13 +143,8 @@ client.on('guildMemberAdd', async (member) => {
             });
         }
 
-        const STAFF_ROLE_ID = "1473013475650568294";
-
-        // 🆕 Crear canal
         const newChannel = await member.guild.channels.create({
-            name: member.displayName
-                .toLowerCase()
-                .replace(/[^a-z0-9]/g, "-"),
+            name: channelName,
             type: ChannelType.GuildText,
             parent: targetCategory.id,
             permissionOverwrites: [
@@ -184,5 +182,4 @@ Welcome 🎉`
     }
 });
 
-// 🔑 Login con variable de entorno
 client.login(process.env.TOKEN);
