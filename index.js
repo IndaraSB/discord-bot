@@ -8,6 +8,7 @@ const {
 const express = require("express");
 const app = express();
 
+// 🌐 Mini servidor para Render (evita que se reinicie)
 app.get("/", (req, res) => {
     res.send("Bot is running");
 });
@@ -16,17 +17,20 @@ app.listen(process.env.PORT || 3000, () => {
     console.log("Web server started");
 });
 
-// 🔥 ESTO FALTABA
+// 🤖 Crear cliente Discord
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers
     ]
 });
+
+// ✅ Evento listo
 client.once('clientReady', () => {
     console.log(`Bot ready as ${client.user.tag}`);
 });
 
+// 👥 Cuando entra un miembro
 client.on('guildMemberAdd', async (member) => {
     try {
 
@@ -59,11 +63,13 @@ client.on('guildMemberAdd', async (member) => {
             });
         }
 
-        // Crear canal dentro de la categoría encontrada
+        const STAFF_ROLE_ID = "1473013475650568294";
+
+        // 🆕 Crear canal
         const newChannel = await member.guild.channels.create({
             name: member.displayName
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "-"),
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, "-"),
             type: ChannelType.GuildText,
             parent: targetCategory.id,
             permissionOverwrites: [
@@ -73,6 +79,13 @@ client.on('guildMemberAdd', async (member) => {
                 },
                 {
                     id: member.id,
+                    allow: [
+                        PermissionsBitField.Flags.ViewChannel,
+                        PermissionsBitField.Flags.SendMessages
+                    ]
+                },
+                {
+                    id: STAFF_ROLE_ID,
                     allow: [
                         PermissionsBitField.Flags.ViewChannel,
                         PermissionsBitField.Flags.SendMessages
@@ -89,10 +102,10 @@ You can also share your general stats here on Tuesdays.
 Welcome 🎉`
         );
 
-    } catch (error) {	
+    } catch (error) {
         console.error(error);
     }
 });
 
-// 🔑 REEMPLAZÁ ESTO CON TU TOKEN REAL
+// 🔑 Login con variable de entorno
 client.login(process.env.TOKEN);
