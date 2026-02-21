@@ -31,7 +31,7 @@ client.once('clientReady', async () => {
 
     const STAFF_ROLE_ID = "1473013475650568294";
 
-    const guild = client.guilds.cache.first(); // Si solo usás 1 servidor
+    const guild = client.guilds.cache.first();
     if (!guild) return;
 
     await guild.members.fetch();
@@ -49,11 +49,64 @@ client.once('clientReady', async () => {
         );
 
         if (!existingChannel) {
+
             console.log(`Creating missing channel for ${member.user.tag}`);
+
+            // 🔎 Buscar categorías
+            let categories = guild.channels.cache.filter(
+                c => c.type === ChannelType.GuildCategory &&
+                     c.name.startsWith("Private Channels")
+            );
+
+            let targetCategory = null;
+
+            for (const category of categories.values()) {
+                const children = guild.channels.cache.filter(
+                    ch => ch.parentId === category.id
+                );
+
+                if (children.size < 50) {
+                    targetCategory = category;
+                    break;
+                }
+            }
+
+            if (!targetCategory) {
+                const number = categories.size + 1;
+                targetCategory = await guild.channels.create({
+                    name: `Private Channels ${number}`,
+                    type: ChannelType.GuildCategory
+                });
+            }
+
+            await guild.channels.create({
+                name: channelName,
+                type: ChannelType.GuildText,
+                parent: targetCategory.id,
+                permissionOverwrites: [
+                    {
+                        id: guild.id,
+                        deny: [PermissionsBitField.Flags.ViewChannel]
+                    },
+                    {
+                        id: member.id,
+                        allow: [
+                            PermissionsBitField.Flags.ViewChannel,
+                            PermissionsBitField.Flags.SendMessages
+                        ]
+                    },
+                    {
+                        id: STAFF_ROLE_ID,
+                        allow: [
+                            PermissionsBitField.Flags.ViewChannel,
+                            PermissionsBitField.Flags.SendMessages
+                        ]
+                    }
+                ]
+            });
         }
     }
-});});
-
+});
 // 👥 Cuando entra un miembro
 client.on('guildMemberAdd', async (member) => {
     try {
