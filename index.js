@@ -26,9 +26,33 @@ const client = new Client({
 });
 
 // ✅ Evento listo
-client.once('clientReady', () => {
+client.once('clientReady', async () => {
     console.log(`Bot ready as ${client.user.tag}`);
-});
+
+    const STAFF_ROLE_ID = "1473013475650568294";
+
+    const guild = client.guilds.cache.first(); // Si solo usás 1 servidor
+    if (!guild) return;
+
+    await guild.members.fetch();
+
+    for (const member of guild.members.cache.values()) {
+
+        if (member.user.bot) continue;
+
+        const channelName = member.displayName
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, "-");
+
+        const existingChannel = guild.channels.cache.find(
+            ch => ch.name === channelName
+        );
+
+        if (!existingChannel) {
+            console.log(`Creating missing channel for ${member.user.tag}`);
+        }
+    }
+});});
 
 // 👥 Cuando entra un miembro
 client.on('guildMemberAdd', async (member) => {
