@@ -84,4 +84,4 @@ Welcome 🎉`
 });
 
 // 🔑 REEMPLAZÁ ESTO CON TU TOKEN REAL
-client.login(process.env.MTQ3NDUyMzc1NzgwMzczNzE4OA.GQ9obp.CbRwM3M6falGIWKZpzrk_6xERt-qNp6f8Rtqjw;
+client.login(process.env.TOKEN);
