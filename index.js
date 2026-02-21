@@ -5,14 +5,25 @@ const {
     PermissionsBitField 
 } = require('discord.js');
 
+const express = require("express");
+const app = express();
+
+app.get("/", (req, res) => {
+    res.send("Bot is running");
+});
+
+app.listen(process.env.PORT || 3000, () => {
+    console.log("Web server started");
+});
+
+// 🔥 ESTO FALTABA
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers
     ]
 });
-
-client.once('ready', () => {
+client.once('clientReady', () => {
     console.log(`Bot ready as ${client.user.tag}`);
 });
 
