@@ -119,3 +119,6 @@ client.on('messageCreate', async (message) => {
     message.reply("I am alive");
 });
 console.log("TOKEN EXISTS:", !!process.env.TOKEN);
+client.login(process.env.TOKEN)
+    .then(() => console.log("LOGIN SUCCESS"))
+    .catch(err => console.error("LOGIN ERROR:", err));
