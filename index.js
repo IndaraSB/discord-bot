@@ -115,6 +115,8 @@ const RESERVATION_CHANNEL_ID = "1466912347099496589";
 
 client.on('messageCreate', async (message) => {
 
+    console.log("DEBUG MESSAGE:", message.content, "Channel:", message.channel.id);
+
     if (message.author.bot) return;
 
     if (message.channel.id !== RESERVATION_CHANNEL_ID) return;
@@ -138,5 +140,4 @@ client.on('messageCreate', async (message) => {
 
     message.reply(`📌 ${coords} reserved by ${message.author.username}`);
 });
-
 client.login(process.env.TOKEN);
