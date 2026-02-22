@@ -117,4 +117,5 @@ client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
 
     message.reply("I am alive");
-});client.login(process.env.TOKEN);
+});
+client.login(process.env.TOKEN);
