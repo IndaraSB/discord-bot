@@ -19,7 +19,9 @@ app.listen(process.env.PORT || 3000, () => {
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMembers
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
     ]
 });
 
@@ -94,6 +96,7 @@ client.on('guildMemberAdd', async (member) => {
             ]
         });
 
+
         await newChannel.send(
 `Hi ${member}, this is the channel for personal use of your account!
 If you need anything or have a question, just tag us.
@@ -105,6 +108,35 @@ Welcome 🎉`
     } catch (error) {
         console.error(error);
     }
+});
+const reservations = new Map();
+
+const RESERVATION_CHANNEL_ID = "1466912347099496589";
+
+client.on('messageCreate', async (message) => {
+
+    if (message.author.bot) return;
+
+    if (message.channel.id !== RESERVATION_CHANNEL_ID) return;
+
+    if (!message.content.startsWith("!take")) return;
+
+    const args = message.content.split(" ");
+    const coords = args[1];
+
+    if (!coords || !coords.match(/^-?\d+\/-?\d+$/)) {
+        return message.reply("⚠️ Use format: !take -181/38");
+    }
+
+    if (reservations.has(coords)) {
+        return message.reply(
+            `❌ ${coords} is already reserved by ${reservations.get(coords)}`
+        );
+    }
+
+    reservations.set(coords, message.author.username);
+
+    message.reply(`📌 ${coords} reserved by ${message.author.username}`);
 });
 
 client.login(process.env.TOKEN);
