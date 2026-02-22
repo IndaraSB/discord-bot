@@ -28,3 +28,7 @@ client.on("error", (err) => {
 });
 
 client.login(process.env.TOKEN);
+client.on("debug", console.log);
+client.on("warn", console.log);
+client.on("debug", console.log);
+client.on("warn", console.log);
