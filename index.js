@@ -118,4 +118,4 @@ client.on('messageCreate', async (message) => {
 
     message.reply("I am alive");
 });
-client.login(process.env.TOKEN);
+console.log("TOKEN EXISTS:", !!process.env.TOKEN);
