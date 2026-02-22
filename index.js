@@ -1,22 +1,23 @@
+const express = require("express");
 const { 
     Client, 
     GatewayIntentBits, 
     ChannelType, 
     PermissionsBitField 
-} = require('discord.js');
+} = require("discord.js");
 
-const express = require("express");
+// ==========================
+// EXPRESS (Render Web Service)
+// ==========================
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// ==========================
-// EXPRESS (Render keep alive)
-// ==========================
 app.get("/", (req, res) => {
     res.send("Bot is running");
 });
 
-app.listen(process.env.PORT || 3000, () => {
-    console.log("Web server started");
+app.listen(PORT, () => {
+    console.log("Web server started on port", PORT);
 });
 
 // ==========================
@@ -34,20 +35,19 @@ const client = new Client({
 const STAFF_ROLE_ID = "1473013475650568294";
 const RESERVATION_CHANNEL_ID = "1466912347099496589";
 
-// Guardado en memoria
 const reservations = new Map();
 
 // ==========================
-// READY
+// BOT READY
 // ==========================
-client.once('ready', () => {
+client.once("ready", () => {
     console.log(`Bot ready as ${client.user.tag}`);
 });
 
 // ==========================
 // AUTO PRIVATE CHANNEL
 // ==========================
-client.on('guildMemberAdd', async (member) => {
+client.on("guildMemberAdd", async (member) => {
     try {
 
         const channelName = `${member.displayName}-${member.id}`
@@ -126,7 +126,7 @@ Welcome 🎉`
 // ==========================
 // RESERVATION SYSTEM
 // ==========================
-client.on('messageCreate', async (message) => {
+client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
     if (message.channel.id !== RESERVATION_CHANNEL_ID) return;
 
@@ -182,6 +182,4 @@ client.on('messageCreate', async (message) => {
 // ==========================
 console.log("TOKEN EXISTS:", !!process.env.TOKEN);
 
-client.login(process.env.TOKEN)
-    .then(() => console.log("LOGIN SUCCESS"))
-    .catch(err => console.error("LOGIN ERROR:", err));
+client.login(process.env.TOKEN);
