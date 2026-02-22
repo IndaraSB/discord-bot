@@ -8,6 +8,9 @@ const {
 const express = require("express");
 const app = express();
 
+// ==========================
+// EXPRESS (Render keep alive)
+// ==========================
 app.get("/", (req, res) => {
     res.send("Bot is running");
 });
@@ -16,6 +19,9 @@ app.listen(process.env.PORT || 3000, () => {
     console.log("Web server started");
 });
 
+// ==========================
+// DISCORD CLIENT
+// ==========================
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -26,17 +32,27 @@ const client = new Client({
 });
 
 const STAFF_ROLE_ID = "1473013475650568294";
+const RESERVATION_CHANNEL_ID = "1466912347099496589";
 
-client.once('clientReady', () => {
+// Guardado en memoria
+const reservations = new Map();
+
+// ==========================
+// READY
+// ==========================
+client.once('ready', () => {
     console.log(`Bot ready as ${client.user.tag}`);
 });
 
+// ==========================
+// AUTO PRIVATE CHANNEL
+// ==========================
 client.on('guildMemberAdd', async (member) => {
     try {
 
-        const channelName = member.displayName
+        const channelName = `${member.displayName}-${member.id}`
             .toLowerCase()
-            .replace(/[^a-z0-9]/g, "-");
+            .replace(/[^a-z0-9-]/g, "-");
 
         const existingChannel = member.guild.channels.cache.find(
             ch => ch.name === channelName
@@ -96,36 +112,31 @@ client.on('guildMemberAdd', async (member) => {
             ]
         });
 
-
         await newChannel.send(
-`Hi ${member}, this is the channel for personal use of your account!
-If you need anything or have a question, just tag us.
-You can also share your general stats here on Tuesdays.
-
+`Hi ${member}, this is your private channel!
+If you need anything, tag staff.
 Welcome 🎉`
         );
 
     } catch (error) {
-        console.error(error);
+        console.error("Channel creation error:", error);
     }
 });
-const reservations = new Map();
 
-const RESERVATION_CHANNEL_ID = "1466912347099496589";
-
+// ==========================
+// RESERVATION SYSTEM
+// ==========================
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
     if (message.channel.id !== RESERVATION_CHANNEL_ID) return;
 
-    const args = message.content.split(" ");
+    const args = message.content.trim().split(/\s+/);
     const command = args[0];
     const coords = args[1];
 
     const regex = /^-?\d+\/-?\d+$/;
 
-    // =========================
-    // TAKE
-    // =========================
+    // ===== TAKE =====
     if (command === "!take") {
 
         if (!coords || !regex.test(coords)) {
@@ -142,9 +153,7 @@ client.on('messageCreate', async (message) => {
         return message.channel.send(`✅ ${coords} reserved by ${message.author}`);
     }
 
-    // =========================
-    // FREE
-    // =========================
+    // ===== FREE =====
     if (command === "!free") {
 
         if (!coords || !regex.test(coords)) {
@@ -156,18 +165,23 @@ client.on('messageCreate', async (message) => {
         }
 
         const reservedBy = reservations.get(coords);
-
         const isStaff = message.member.roles.cache.has(STAFF_ROLE_ID);
 
         if (reservedBy !== message.author.id && !isStaff) {
-            return message.reply("❌ You cannot free this coordinate (not yours).");
+            return message.reply("❌ You cannot free this coordinate.");
         }
 
         reservations.delete(coords);
 
-        return message.channel.send(`🗑️ ${coords} has been freed by ${message.author}`);
+        return message.channel.send(`🗑️ ${coords} freed by ${message.author}`);
     }
-});console.log("TOKEN EXISTS:", !!process.env.TOKEN);
+});
+
+// ==========================
+// LOGIN
+// ==========================
+console.log("TOKEN EXISTS:", !!process.env.TOKEN);
+
 client.login(process.env.TOKEN)
     .then(() => console.log("LOGIN SUCCESS"))
     .catch(err => console.error("LOGIN ERROR:", err));
