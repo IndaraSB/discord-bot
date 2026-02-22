@@ -114,30 +114,7 @@ const reservations = new Map();
 const RESERVATION_CHANNEL_ID = "1466912347099496589";
 
 client.on('messageCreate', async (message) => {
-
-    console.log("DEBUG MESSAGE:", message.content, "Channel:", message.channel.id);
-
     if (message.author.bot) return;
 
-    if (message.channel.id !== RESERVATION_CHANNEL_ID) return;
-
-    if (!message.content.startsWith("!take")) return;
-
-    const args = message.content.split(" ");
-    const coords = args[1];
-
-    if (!coords || !coords.match(/^-?\d+\/-?\d+$/)) {
-        return message.reply("⚠️ Use format: !take -181/38");
-    }
-
-    if (reservations.has(coords)) {
-        return message.reply(
-            `❌ ${coords} is already reserved by ${reservations.get(coords)}`
-        );
-    }
-
-    reservations.set(coords, message.author.username);
-
-    message.reply(`📌 ${coords} reserved by ${message.author.username}`);
-});
-client.login(process.env.TOKEN);
+    message.reply("I am alive");
+});client.login(process.env.TOKEN);
